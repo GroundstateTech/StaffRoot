@@ -1,0 +1,20 @@
+name: Validate StaffRoot
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Compile all Python files
+        run: python -m compileall -q .
+      - name: Initialize database schema
+        run: python -c "from main import init_db; init_db(); print('StaffRoot schema initialized')"
