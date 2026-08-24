@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# StaffRoot local state / secrets
+staffroot.local.json
+data/*.db
+data/*.db-*
+data/backups/
+!data/.gitkeep
+
+# Builds
+build/
+dist/
+*.spec.bak
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
