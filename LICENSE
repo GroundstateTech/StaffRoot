@@ -1,10 +1,12 @@
-GNU GENERAL PUBLIC LICENSE
-Version 3, 29 June 2007
+Mozilla Public License Version 2.0
 
-This project is licensed under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later).
+StaffRoot is licensed under the Mozilla Public License, Version 2.0 (MPL-2.0).
 
-Canonical license text: https://www.gnu.org/licenses/gpl-3.0.txt
+The canonical license text is published by the Mozilla Foundation at:
+https://www.mozilla.org/MPL/2.0/
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MPL-2.0
 
-Copyright © 2026 Groundstate Technology LLC and contributors. Groundstate names, logos, and official-project identity are separate from the source-code license.
+Copyright © 2026 Groundstate Technology LLC and contributors. Groundstate names, logos, artwork, and official-project identity are separate from the source-code license.
+
+Source files covered by this project may be used, modified, and redistributed subject to the terms and file-level copyleft obligations of MPL-2.0.
