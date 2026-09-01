@@ -24,6 +24,7 @@ class IdentitySyncView(ttk.Frame):
         self.db = db
         self.current_user = current_user
         self.config = ensure_local_config()
+        self.provider_name_var = tk.StringVar(self, value=self.config.get("identity_provider_name", ""))
         self.base_url_var = tk.StringVar(self, value=self.config.get("identity_base_url", ""))
         self.api_key_var = tk.StringVar(self, value=self.config.get("identity_api_token", ""))
         self.sync_enabled_var = tk.BooleanVar(self, value=bool(self.config.get("identity_sync_enabled", False)))
@@ -33,14 +34,16 @@ class IdentitySyncView(ttk.Frame):
     def _build_ui(self):
         frame = ttk.Labelframe(self, text="Optional Organization Identity")
         frame.pack(fill="x", padx=10, pady=10)
-        ttk.Label(frame, text="Base URL:").grid(row=0, column=0, sticky="e", padx=5, pady=4)
-        ttk.Entry(frame, textvariable=self.base_url_var, width=48).grid(row=0, column=1, sticky="w", padx=5, pady=4)
-        ttk.Label(frame, text="API key/token:").grid(row=1, column=0, sticky="e", padx=5, pady=4)
-        ttk.Entry(frame, textvariable=self.api_key_var, width=48, show="*").grid(row=1, column=1, sticky="w", padx=5, pady=4)
-        ttk.Checkbutton(frame, text="Enable sync mode", variable=self.sync_enabled_var).grid(row=2, column=1, sticky="w", padx=5, pady=4)
-        ttk.Button(frame, text="Save Config", command=self._save_config).grid(row=3, column=0, padx=5, pady=8)
-        ttk.Button(frame, text="Test Connection", command=self._test_connection).grid(row=3, column=1, sticky="w", padx=5, pady=8)
-        ttk.Button(frame, text="Pull Employees", command=self._pull_employees).grid(row=3, column=1, sticky="e", padx=5, pady=8)
+        ttk.Label(frame, text="Provider name:").grid(row=0, column=0, sticky="e", padx=5, pady=4)
+        ttk.Entry(frame, textvariable=self.provider_name_var, width=48).grid(row=0, column=1, sticky="w", padx=5, pady=4)
+        ttk.Label(frame, text="Base URL:").grid(row=1, column=0, sticky="e", padx=5, pady=4)
+        ttk.Entry(frame, textvariable=self.base_url_var, width=48).grid(row=1, column=1, sticky="w", padx=5, pady=4)
+        ttk.Label(frame, text="API key/token:").grid(row=2, column=0, sticky="e", padx=5, pady=4)
+        ttk.Entry(frame, textvariable=self.api_key_var, width=48, show="*").grid(row=2, column=1, sticky="w", padx=5, pady=4)
+        ttk.Checkbutton(frame, text="Enable sync mode", variable=self.sync_enabled_var).grid(row=4, column=1, sticky="w", padx=5, pady=4)
+        ttk.Button(frame, text="Save Config", command=self._save_config).grid(row=4, column=0, padx=5, pady=8)
+        ttk.Button(frame, text="Test Connection", command=self._test_connection).grid(row=4, column=1, sticky="w", padx=5, pady=8)
+        ttk.Button(frame, text="Pull Employees", command=self._pull_employees).grid(row=4, column=1, sticky="e", padx=5, pady=8)
         ttk.Label(self, textvariable=self.status_var).pack(anchor="w", padx=12, pady=(0, 8))
 
         columns = ("external_id", "name", "email", "department", "status", "result")
@@ -65,9 +68,10 @@ class IdentitySyncView(ttk.Frame):
             "identity_base_url": self.base_url_var.get().strip(),
             "identity_api_token": self.api_key_var.get().strip(),
             "identity_sync_enabled": self.sync_enabled_var.get(),
-            "identity_provider_name": self.config.get("identity_provider_name", ""),
+            "identity_provider_name": self.provider_name_var.get().strip(),
         }
         save_local_config(data)
+        self.config = data
         self.status_var.set("Config saved.")
         log_event(self.db, self.current_user, "IDENTITY_PROVIDER_CONFIG_SAVE", data["identity_base_url"])
 
@@ -80,6 +84,9 @@ class IdentitySyncView(ttk.Frame):
             self.status_var.set("Connection failed.")
 
     def _pull_employees(self):
+        if not self.sync_enabled_var.get():
+            messagebox.showinfo("Sync disabled", "Enable optional directory sync before importing employees.")
+            return
         self.tree.delete(*self.tree.get_children())
         try:
             employees = self._client().get_employees()
