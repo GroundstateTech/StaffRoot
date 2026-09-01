@@ -14,7 +14,7 @@ BACKUP_DIR.mkdir(exist_ok=True)
 DB_PATH = DATA_DIR / "staffroot.db"
 
 APP_NAME = "StaffRoot"
-APP_VERSION = "0.9.7"
+APP_VERSION = "0.10.0"
 APP_ICON = ASSETS_DIR / "staffroot.ico"
 
 LOCAL_CONFIG_PATH = BASE_DIR / "staffroot.local.json"
