@@ -1,5 +1,6 @@
 {
-  "admin_center_base_url": "http://127.0.0.1:8000",
-  "admin_center_api_key": "",
-  "sync_enabled": false
+  "identity_provider_name": "",
+  "identity_base_url": "",
+  "identity_api_token": "",
+  "identity_sync_enabled": false
 }
