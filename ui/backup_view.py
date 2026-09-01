@@ -1,4 +1,4 @@
-import os, shutil
+import os, shutil, sqlite3
 from datetime import datetime
 from tkinter import ttk, messagebox
 from db.session import engine
@@ -24,4 +24,15 @@ class BackupView(ttk.Frame):
         s=self.tree.selection()
         if not s: return
         src=os.path.join(self.backup_dir,self.tree.item(s[0],"values")[0])
-        if messagebox.askyesno("Restore","Overwrite current database? Restart app afterward."): shutil.copy2(src,self.db_file); messagebox.showinfo("Restored","Backup restored. Restart StaffRoot.")
+        try:
+            with sqlite3.connect(src) as connection:
+                result=connection.execute("PRAGMA integrity_check").fetchone()
+            if not result or result[0] != "ok": raise ValueError("SQLite integrity check failed")
+        except (sqlite3.Error,ValueError) as exc:
+            messagebox.showerror("Restore blocked",f"The selected backup is not a healthy StaffRoot database.\n\n{exc}"); return
+        if messagebox.askyesno("Restore","Overwrite current database? A rollback copy will be created first; restart the app afterward."):
+            rollback=os.path.join(self.backup_dir,f"staffroot_pre_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db")
+            engine.dispose()
+            if os.path.exists(self.db_file): shutil.copy2(self.db_file,rollback)
+            shutil.copy2(src,self.db_file)
+            self.refresh(); messagebox.showinfo("Restored",f"Backup restored. Restart StaffRoot.\n\nRollback copy:\n{rollback}")
