@@ -17,9 +17,9 @@ class EmployeesView(ttk.Frame):
         ttk.Button(bar, text="Edit", command=self._edit).pack(side="left", padx=4)
         ttk.Button(bar, text="Delete", command=self._delete).pack(side="left", padx=4)
         ttk.Button(bar, text="Refresh", command=self.refresh).pack(side="right", padx=4)
-        cols = ("id", "admin_id", "name", "email", "dept", "position", "status")
+        cols = ("id", "external_id", "name", "email", "dept", "position", "status")
         self.tree = ttk.Treeview(self, columns=cols, show="headings", height=22)
-        for c, l, w in [("id","ID",50),("admin_id","Admin ID",120),("name","Name",180),("email","Email",180),("dept","Dept",120),("position","Position",140),("status","Status",90)]:
+        for c, l, w in [("id","ID",50),("external_id","External ID",120),("name","Name",180),("email","Email",180),("dept","Dept",120),("position","Position",140),("status","Status",90)]:
             self.tree.heading(c, text=l); self.tree.column(c, width=w, anchor="w")
         self.tree.pack(fill="both", expand=True, padx=8, pady=8)
         self.tree.bind("<Double-1>", lambda e: self._edit())
@@ -32,7 +32,7 @@ class EmployeesView(ttk.Frame):
         self.tree.delete(*self.tree.get_children())
         for emp in self.db.query(Employee).order_by(Employee.last_name, Employee.first_name).all():
             jd = emp.job_detail
-            self.tree.insert("", "end", values=(emp.id, emp.admin_center_employee_id or "", f"{emp.first_name} {emp.last_name}", emp.email or "", jd.department if jd else "", jd.position_title if jd else "", emp.status or ""))
+            self.tree.insert("", "end", values=(emp.id, emp.external_identity_id or "", f"{emp.first_name} {emp.last_name}", emp.email or "", jd.department if jd else "", jd.position_title if jd else "", emp.status or ""))
 
     def _add(self):
         d = EmployeeDialog(self, self.db, None); self.wait_window(d); self.refresh()

@@ -1,53 +1,46 @@
 # StaffRoot
 
-**StaffRoot** is the Groundstate Technology HR/payroll node: a Windows-first desktop prototype for employee records, time & attendance, payroll runs, reporting, user access, audit history, backup/restore, and employee self-service.
+**StaffRoot** is a standalone-first HR/payroll desktop prototype for employee records, time and attendance, payroll runs, reporting, local user access, audit history, backup/restore, and employee self-service.
 
-StaffRoot is designed around one architectural rule: **the Groundstate Admin Control Center is the master identity and organization authority**. StaffRoot can still operate standalone for development or disconnected environments, but Control Center integration is the canonical direction.
+StaffRoot does not require a Groundstate account, Groundstate Admin Center, cloud service, or external identity server. A normal installation creates and manages local accounts and data entirely on the user's machine.
 
 ## Current release
 
-**v0.10.0 — safer first-run prototype**
+**v0.11.0 — standalone-first identity cleanup**
 
 ### Included
 
-- Midnight/cyan Groundstate Control Center-style UI shell
+- Secure first-run creation of the initial local administrator
 - Admin / HR / Employee role separation
 - Employee HR profiles with address, DOB, emergency contact, job/pay data, and SSN-last-four only
-- Time & Attendance with employee/date filtering and approval workflow
+- Time and attendance with employee/date filtering and approval workflow
 - Payroll run generation from approved time
 - Employee paystub history
 - Payroll reports and CSV export
 - Local users and employee-account linking
 - Audit log
-- Backup and restore
-- Groundstate Admin Control Center connection settings and employee pull-sync
+- Integrity-checked backup and restore with rollback copies
+- Optional provider-neutral organization directory sync
 - PyInstaller no-console Windows packaging
 - GitHub validation workflow
 
-## Architecture
+## Operation modes
 
-```text
-Groundstate Admin Control Center
-        │
-        ├── identity / users / roles
-        ├── employees / departments
-        ├── app permissions
-        │
-        └──── StaffRoot
-               ├── HR extensions
-               ├── time & attendance
-               ├── payroll
-               ├── paystubs
-               └── payroll reporting
-```
+### Standalone — default
 
-See `docs/GROUNDSTATE_CONTROL_CENTER_INTEGRATION.md` for the integration contract.
+Local accounts, roles, employee records, payroll data, backups, and audit history remain entirely within StaffRoot. No network connection or external identity service is needed.
+
+### Organization-managed — optional
+
+An administrator may explicitly configure an organization identity provider to import basic employee directory information. This integration is disabled by default. Provider outages do not prevent local sign-in or access to locally stored StaffRoot data.
+
+The external provider supplies identity and directory references only. StaffRoot remains authoritative for HR extensions, time entries, pay rates, payroll runs, paystubs, deductions, and reports.
+
+See `docs/OPTIONAL_IDENTITY_INTEGRATION.md`.
 
 ## First run
 
-StaffRoot no longer ships with a shared default password. The first launch opens
-a setup screen that creates the initial local administrator. Passwords must be
-at least 10 characters and are stored as salted PBKDF2 hashes.
+StaffRoot does not ship with shared credentials. The first launch creates the initial local administrator. Passwords must be at least 10 characters and are stored as salted PBKDF2 hashes.
 
 ## Run from source
 
@@ -62,7 +55,9 @@ Windows shortcut: `run_staffroot.bat`
 
 ## Local configuration
 
-On first run StaffRoot creates `staffroot.local.json`. It is excluded from Git because it may contain a Control Center credential. A safe template is provided in `staffroot.local.example.json`.
+On first run, StaffRoot creates `staffroot.local.json`. The default configuration is standalone and contains no endpoint or credential. The file is excluded from Git because an administrator may later add an organization identity token.
+
+Existing configurations using the former Admin Center keys are migrated in memory to the provider-neutral format. Saving settings writes only the new keys.
 
 ## Build StaffRoot.exe
 
@@ -71,16 +66,17 @@ python -m pip install -r requirements.txt
 pyinstaller StaffRoot.spec
 ```
 
-The spec uses `console=False`, so the packaged application does not open a command prompt window. StaffRoot also hides the login root while the application shell is active, preventing the prior blank/ghost Tk window.
+The specification uses `console=False`, so the packaged application does not open a command prompt window.
 
 ## Data safety
 
-Local runtime files are intentionally excluded from source control: `staffroot.local.json`, `data/*.db`, `data/backups/`, and build artifacts. Do not commit real employee information, payroll records, credentials, or database backups.
+Local runtime files are excluded from source control: `staffroot.local.json`, `data/*.db`, `data/backups/`, and build artifacts. Never commit real employee information, payroll records, credentials, or database backups.
 
 ## Validation
 
 ```bash
 python -m compileall -q .
+python -m unittest discover -s tests -v
 python -c "from main import init_db; init_db(); print('StaffRoot schema initialized')"
 ```
 

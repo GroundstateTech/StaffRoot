@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from core.config import APP_ICON, APP_NAME, APP_VERSION
 from core.theme import APP_TAGLINE, BLUE, CYAN, CYAN_DEEP, DIVIDER, FONT_HEADER, FONT_SUBHEADER, FONT_UI, MIDNIGHT, PANEL, PANEL_ALT, SURFACE, SURFACE_2, TEXT, TEXT_MUTED
 from db.models import Employee, User
-from ui.admin_sync_view import AdminSyncView
+from ui.identity_sync_view import IdentitySyncView
 from ui.audit_view import AuditLogView
 from ui.backup_view import BackupView
 from ui.dashboard_view import DashboardView
@@ -109,14 +109,14 @@ class MainWindow(tk.Toplevel):
         nav_header = ttk.Frame(self.sidebar, style="Sidebar.TFrame")
         nav_header.pack(fill="x", padx=10, pady=(14, 8))
         ttk.Label(nav_header, text="MODULES", style="Node.TLabel").pack(anchor="w")
-        ttk.Label(nav_header, text="Control Center-linked navigation", style="Muted.TLabel").pack(anchor="w", pady=(2, 0))
+        ttk.Label(nav_header, text="Standalone HR and payroll", style="Muted.TLabel").pack(anchor="w", pady=(2, 0))
 
         self.nav_frame = ttk.Frame(self.sidebar, style="Sidebar.TFrame")
         self.nav_frame.pack(fill="both", expand=True, padx=8, pady=8)
         status_frame = ttk.Frame(self.sidebar, style="Sidebar.TFrame")
         status_frame.pack(fill="x", side="bottom", padx=10, pady=12)
-        ttk.Label(status_frame, text="SYNC MODE", style="Node.TLabel").pack(anchor="w")
-        ttk.Label(status_frame, text="Standalone-ready / Control-ready", style="Muted.TLabel", wraplength=190).pack(anchor="w", pady=(2, 0))
+        ttk.Label(status_frame, text="OPERATION MODE", style="Node.TLabel").pack(anchor="w")
+        ttk.Label(status_frame, text="Standalone by default", style="Muted.TLabel", wraplength=190).pack(anchor="w", pady=(2, 0))
 
         self.content_wrap = ttk.Frame(body, style="Content.TFrame")
         self.content_wrap.pack(fill="both", expand=True, side="left")
@@ -144,12 +144,12 @@ class MainWindow(tk.Toplevel):
         role = (self.current_user.role or "").upper()
         if role in ("ADMIN", "HR"):
             self._add_page("dashboard", "Dashboard", "System overview and workforce signals.", lambda p: DashboardView(p, self.db))
-            self._add_page("sync", "Admin Center Sync", "Connect StaffRoot to Groundstate Admin Control Center.", lambda p: AdminSyncView(p, self.db, self.current_user))
-            self._add_page("employees", "Employees", "Local HR records linked to master identities.", lambda p: EmployeesView(p, self.db))
+            self._add_page("sync", "Organization Identity", "Optional employee directory connection; local operation does not require it.", lambda p: IdentitySyncView(p, self.db, self.current_user))
+            self._add_page("employees", "Employees", "Local HR records with optional external identity references.", lambda p: EmployeesView(p, self.db))
             self._add_page("time", "Time & Attendance", "Hours, call-offs, approvals, and timecard review.", lambda p: TimeView(p, self.db, current_user=self.current_user))
             self._add_page("payroll", "Payroll", "Generate payroll runs from approved time.", lambda p: PayrollView(p, self.db))
             self._add_page("reports", "Reports", "Payroll summaries by department and employee.", lambda p: ReportsView(p, self.db))
-            self._add_page("settings", "Settings", "StaffRoot configuration and Control Center endpoint.", lambda p: SettingsView(p, self.db))
+            self._add_page("settings", "Settings", "Local settings and optional organization identity.", lambda p: SettingsView(p, self.db))
             self._add_page("users", "Users & Access", "Local users, roles, and employee account linking.", lambda p: UsersView(p, self.db, self.current_user))
             self._add_page("audit", "Audit Log", "Operational activity trail.", lambda p: AuditLogView(p, self.db))
             if role == "ADMIN":
