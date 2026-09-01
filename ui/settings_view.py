@@ -2,17 +2,39 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from core.config import APP_NAME, APP_VERSION, ensure_local_config, save_local_config
 
+
 class SettingsView(ttk.Frame):
-    def __init__(self,master,db):
-        super().__init__(master); self.db=db; c=ensure_local_config(); self.url=tk.StringVar(self,value=c.get("admin_center_base_url","")); self.key=tk.StringVar(self,value=c.get("admin_center_api_key","")); self.sync=tk.BooleanVar(self,value=bool(c.get("sync_enabled",False))); self._build()
+    def __init__(self, master, db):
+        super().__init__(master)
+        self.db = db
+        config = ensure_local_config()
+        self.provider = tk.StringVar(self, value=config.get("identity_provider_name", ""))
+        self.url = tk.StringVar(self, value=config.get("identity_base_url", ""))
+        self.token = tk.StringVar(self, value=config.get("identity_api_token", ""))
+        self.enabled = tk.BooleanVar(self, value=bool(config.get("identity_sync_enabled", False)))
+        self._build()
+
     def _build(self):
-        f=ttk.Labelframe(self,text="StaffRoot"); f.pack(fill="x",padx=10,pady=10)
-        ttk.Label(f,text=f"{APP_NAME} v{APP_VERSION}").pack(anchor="w",padx=10,pady=6)
-        g=ttk.Labelframe(self,text="Groundstate Admin Control Center"); g.pack(fill="x",padx=10,pady=10)
-        for i,(lab,var) in enumerate([("Base URL",self.url),("API Key",self.key)]):
-            ttk.Label(g,text=lab).grid(row=i,column=0,sticky="e",padx=5,pady=4); ttk.Entry(g,textvariable=var,width=48,show="*" if lab=="API Key" else "").grid(row=i,column=1,sticky="w")
-        ttk.Checkbutton(g,text="Enable sync",variable=self.sync).grid(row=2,column=1,sticky="w")
-        ttk.Button(g,text="Save",command=self.save).grid(row=3,column=1,sticky="w",pady=8)
+        app = ttk.Labelframe(self, text="StaffRoot")
+        app.pack(fill="x", padx=10, pady=10)
+        ttk.Label(app, text=f"{APP_NAME} v{APP_VERSION}").pack(anchor="w", padx=10, pady=6)
+        ttk.Label(app, text="Local accounts and data work without any external service.").pack(anchor="w", padx=10, pady=(0, 8))
+
+        identity = ttk.Labelframe(self, text="Optional Organization Identity")
+        identity.pack(fill="x", padx=10, pady=10)
+        fields = [("Provider name", self.provider, False), ("Base URL", self.url, False), ("API token", self.token, True)]
+        for row, (label, variable, secret) in enumerate(fields):
+            ttk.Label(identity, text=label).grid(row=row, column=0, sticky="e", padx=5, pady=4)
+            ttk.Entry(identity, textvariable=variable, width=48, show="*" if secret else "").grid(row=row, column=1, sticky="w")
+        ttk.Checkbutton(identity, text="Enable optional directory sync", variable=self.enabled).grid(row=3, column=1, sticky="w")
+        ttk.Label(identity, text="Leave disabled for normal standalone operation.").grid(row=4, column=1, sticky="w", pady=(2, 6))
+        ttk.Button(identity, text="Save", command=self.save).grid(row=5, column=1, sticky="w", pady=8)
+
     def save(self):
-        save_local_config({"admin_center_base_url":self.url.get().strip(),"admin_center_api_key":self.key.get().strip(),"sync_enabled":self.sync.get()})
-        messagebox.showinfo("Saved","Settings saved.")
+        save_local_config({
+            "identity_provider_name": self.provider.get().strip(),
+            "identity_base_url": self.url.get().strip(),
+            "identity_api_token": self.token.get().strip(),
+            "identity_sync_enabled": self.enabled.get(),
+        })
+        messagebox.showinfo("Saved", "Settings saved. Standalone operation remains available.")
