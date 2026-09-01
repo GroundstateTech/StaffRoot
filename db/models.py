@@ -21,7 +21,7 @@ class User(Base):
     password_hash = Column(String(256), nullable=False)
     role = Column(String(24), nullable=False, default="EMPLOYEE")
     employee_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
-    admin_center_user_id = Column(String(128), nullable=True, index=True)
+    external_identity_id = Column("admin_center_user_id", String(128), nullable=True, index=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -31,7 +31,7 @@ class Employee(Base):
     __tablename__ = "employees"
 
     id = Column(Integer, primary_key=True)
-    admin_center_employee_id = Column(String(128), nullable=True, index=True)
+    external_identity_id = Column("admin_center_employee_id", String(128), nullable=True, index=True)
     source_system = Column(String(64), default="local")
     last_synced_at = Column(DateTime, nullable=True)
 
