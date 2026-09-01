@@ -6,7 +6,7 @@ StaffRoot is designed around one architectural rule: **the Groundstate Admin Con
 
 ## Current release
 
-**v0.9.7 — Control-ready prototype**
+**v0.10.0 — safer first-run prototype**
 
 ### Included
 
@@ -43,14 +43,11 @@ Groundstate Admin Control Center
 
 See `docs/GROUNDSTATE_CONTROL_CENTER_INTEGRATION.md` for the integration contract.
 
-## Development login
+## First run
 
-```text
-username: admin
-password: admin123
-```
-
-**Change this immediately for any persistent installation.** StaffRoot is a prototype and the development credential is intentionally obvious.
+StaffRoot no longer ships with a shared default password. The first launch opens
+a setup screen that creates the initial local administrator. Passwords must be
+at least 10 characters and are stored as salted PBKDF2 hashes.
 
 ## Run from source
 
